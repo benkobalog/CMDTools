@@ -13,18 +13,29 @@ endChar = '}'
 toLowerStr str = map toLower str
 
 parseColor :: String -> ColorCode
-parseColor str = 
-    case (toLowerStr str) of
-        "red" -> Red
-        "blue" -> Blue
-        "green" -> Green 
-        "yellow" -> Yellow 
-        "black" -> Black 
-        "white" -> White
-        s -> extractColor s 
+parseColor str = let (color, ctype) = span (','/=) str in
+    parseColor' color (getType ctype)
     where
-        extractColor ('c':'o':'l':'o':'r':' ':code) = 
-            Code (read code)
+    getType ctype = 
+        if null ctype then Normal
+        else case toLowerStr (drop 1 ctype) of 
+            "normal" -> Normal
+            "bold" -> Bold 
+            "underline" -> Underline 
+            "background" -> Background 
+            "highintensity" -> HighIntensity 
+            "boldhighintensity" -> BoldHighIntensity 
+            "highintensitybackground" -> HighIntensityBackground
+    parseColor' str ct = 
+        case (toLowerStr str) of
+            "red" -> Red ct
+            "blue" -> Blue ct
+            "green" -> Green ct
+            "yellow" -> Yellow ct
+            "black" -> Black ct
+            "white" -> White ct
+            "purple" -> Purple ct
+            "cyan" -> Cyan ct
 
 parseOperation :: Parser PromptPart
 parseOperation = let 

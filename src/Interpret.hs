@@ -4,20 +4,33 @@ module Interpret
 
 import PromptModel
 
-colorBlock s = "\\[\\033[" ++ s ++ "m\\]"
+colorBlock s ct = let str = colorTypeModifier ct s in
+    "\\[\\033[" ++ str ++ "m\\]"
+
+colorTypeModifier :: ColorType -> Int -> String
+colorTypeModifier ct num = 
+    case ct of
+        Normal -> "0;" ++ (show num)
+        Bold -> "1;" ++ (show num)
+        Underline -> "4;" ++ (show num) -- This probably won't work
+        Background -> "1;" ++ (show (num + 10))
+        HighIntensity -> "0;" ++ (show (num + 60))
+        BoldHighIntensity -> "1;" ++ (show (num + 60))
+        HighIntensityBackground -> "0;" ++ (show (num + 70))
 
 class PromptListInterpreter a where
     interpret :: a -> String
 
 instance PromptListInterpreter ColorCode where
     interpret cc = case cc of
-        Red -> colorBlock "31"
-        Blue -> colorBlock "34"
-        Green -> colorBlock "32"
-        Yellow -> colorBlock "33"
-        Black -> colorBlock "30"
-        White -> colorBlock "37"
-        Code int -> colorBlock (show int)
+        Black ct ->  colorBlock 30 ct
+        Red ct ->    colorBlock 31 ct
+        Green ct ->  colorBlock 32 ct
+        Yellow ct -> colorBlock 33 ct
+        Blue ct ->   colorBlock 34 ct
+        Purple ct -> colorBlock 34 ct
+        Cyan ct ->   colorBlock 36 ct
+        White ct ->  colorBlock 37 ct
 
 instance PromptListInterpreter PromptPart where
     interpret pp = case pp of

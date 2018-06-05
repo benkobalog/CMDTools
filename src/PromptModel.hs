@@ -2,16 +2,28 @@ module PromptModel
     ( ColorCode (..)
     , PromptPart (..)
     , PromptTokens (..)
+    , ColorType (..)
     ) where
 
 data ColorCode =
-    Red |
-    Blue |
-    Green |
-    Yellow |
-    Black |
-    White |
-    Code Int
+    Red ColorType |
+    Blue ColorType |
+    Green ColorType |
+    Yellow ColorType |
+    Black ColorType |
+    White ColorType |
+    Purple ColorType |
+    Cyan ColorType
+    deriving Show
+
+data ColorType = 
+    Normal |
+    Bold |
+    Underline |
+    Background |
+    HighIntensity |
+    BoldHighIntensity |
+    HighIntensityBackground
     deriving Show
 
 data PromptPart =
