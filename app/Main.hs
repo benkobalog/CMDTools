@@ -18,14 +18,14 @@ data ColorCode =
     Code Int
     deriving Show
 
-data Operation =
+data PromptPart =
     Username |
     Hostname |
     PWD | 
     Color ColorCode
     deriving Show
 
-data PromptTokens = Op Operation | Filler String
+data PromptTokens = Part PromptPart | Filler String
     deriving Show
 
 startChar = '{'
@@ -40,28 +40,33 @@ parseColor str =
         "yellow" -> Yellow 
         "black" -> Black 
         "white" -> White
+        s -> extractColor s 
+    where
+        extractColor ('c':'o':'l':'o':'r':' ':code) = Code (read code)
 
 
-parseOperation :: Parser Operation
+parseOperation :: Parser PromptPart
 parseOperation = let 
-        matchOp s =  case s of 
+        matchOp s = case s of 
             "Username" -> Username
             "Hostname" -> Hostname
             "PWD" -> PWD
-            in do 
-                char startChar
-                str <- manyTill anyChar (char endChar)
-                return $ matchOp str
+            rest -> Color $ parseColor rest
+    in do
+        char startChar
+        str <- manyTill anyChar (char endChar)
+        return $ matchOp str
 
 tokenList :: Parser [PromptTokens]
 tokenList = let
         filler = Filler <$> many1 (noneOf [startChar])
-        op = Op <$> parseOperation
-    in many (filler <|> op)
+        part = Part <$> parseOperation
+    in many (filler <|> part)
 
 main :: IO ()
 main = do
     input <- getArgs
-    -- parseTest moreTokens (head input)
-    parseTest tokenList (head input)
-    -- putStrLn $ show (regularParse moreTokens (head input))
+    let result = parse tokenList "" (head input) in
+        case result of
+            Right tokenList -> putStrLn $ show tokenList
+            Left err -> putStrLn $ show err
